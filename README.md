@@ -2,7 +2,7 @@
 
 This folder contains the **single-file, pure frontend** voting system:
 
-- [sistem_undi_pure_frontend.html](./sistem_undi_pure_frontend.html)
+- [sistem_undi_pure_frontend.html](https://pacguy-mtk.github.io/sistem-undi-smk/))
 
 The app is a compact voting demo for favorite school subjects. It runs entirely in the browser with **vanilla JavaScript**, **Tailwind CSS**, and **localStorage**. No backend, database, PHP, or server setup is required.
 
