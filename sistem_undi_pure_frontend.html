@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f172a" />
+  <title>Sistem D'Undi Subjek Kegemaran</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          boxShadow: {
+            glow: '0 20px 80px rgba(15, 23, 42, 0.45)',
+          },
+        }
+      }
+    };
+  </script>
+  <style>
+    :root {
+      --bg: #07111f;
+      --bg-soft: rgba(15, 23, 42, 0.72);
+      --panel: rgba(15, 23, 42, 0.86);
+      --line: rgba(148, 163, 184, 0.18);
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #34d399;
+      --accent-2: #60a5fa;
+      --warn: #fbbf24;
+      --danger: #f87171;
+    }
+
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: "Inter", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(52, 211, 153, 0.18), transparent 26%),
+        radial-gradient(circle at top right, rgba(96, 165, 250, 0.16), transparent 24%),
+        linear-gradient(160deg, #050816 0%, #0b1220 45%, #09111d 100%);
+      min-height: 100vh;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.55;
+      background-image:
+        linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+      background-size: 44px 44px;
+    }
+    .glass {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      backdrop-filter: blur(18px);
+      box-shadow: 0 20px 80px rgba(0, 0, 0, 0.28);
+    }
+    .brand-badge {
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      color: #06261b;
+      background: linear-gradient(135deg, var(--accent) 0%, #a7f3d0 100%);
+    }
+    .nav-pill {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.05);
+      color: var(--text);
+    }
+    .nav-pill.active {
+      border-color: rgba(52, 211, 153, 0.5);
+      background: linear-gradient(135deg, rgba(52,211,153,0.18), rgba(96,165,250,0.18));
+    }
+    .input, .select, .textarea {
+      width: 100%;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      padding: 0.9rem 1rem;
+      outline: none;
+    }
+    .input:focus, .select:focus, .textarea:focus {
+      border-color: rgba(52, 211, 153, 0.6);
+      box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.12);
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #34d399, #86efac);
+      color: #052015;
+      font-weight: 800;
+    }
+    .btn-secondary {
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      border: 1px solid var(--line);
+    }
+    .btn-danger {
+      background: rgba(248, 113, 113, 0.12);
+      border: 1px solid rgba(248, 113, 113, 0.35);
+      color: #fecaca;
+    }
+    .badge-soft {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+    }
+    .section-title {
+      font-size: clamp(1.55rem, 2vw, 2.2rem);
+      line-height: 1.05;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+    }
+    .eyebrow {
+      color: #fbbf24;
+      letter-spacing: 0.16em;
+      text-transform: uppercase;
+      font-size: 0.74rem;
+      font-weight: 800;
+    }
+    .hidden-view { display: none !important; }
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      gap: 1.25rem;
+    }
+    .subject-card {
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.05);
+      border-radius: 20px;
+      padding: 1rem;
+    }
+    .vote-bar {
+      height: 12px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.08);
+      overflow: hidden;
+    }
+    .vote-bar > span {
+      display: block;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, #34d399, #60a5fa);
+    }
+    .table-row {
+      border-bottom: 1px solid rgba(148, 163, 184, 0.14);
+    }
+    .table-row:last-child { border-bottom: 0; }
+    .chip {
+      padding: 0.4rem 0.7rem;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.05);
+      font-size: 0.82rem;
+    }
+    .flash {
+      border-radius: 18px;
+      padding: 0.95rem 1rem;
+      border: 1px solid var(--line);
+      background: rgba(255,255,255,0.06);
+    }
+    .flash.success { border-color: rgba(52, 211, 153, 0.35); background: rgba(52, 211, 153, 0.12); }
+    .flash.error { border-color: rgba(248, 113, 113, 0.35); background: rgba(248, 113, 113, 0.12); }
+    .flash.warn { border-color: rgba(251, 191, 36, 0.35); background: rgba(251, 191, 36, 0.12); }
+    .fade-in { animation: fadeIn 0.28s ease both; }
+    .mode-login #view-login .hero-grid {
+      grid-template-columns: 1fr;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+    .mode-login #view-login .hero-grid > :first-child {
+      display: none;
+    }
+    .mode-login #view-login .glass {
+      padding: 1.25rem;
+    }
+    .mode-login #view-login .glass p,
+    .mode-login #view-login .chip,
+    .mode-login #view-login .subject-card {
+      display: none;
+    }
+    .mode-login #view-login .section-title {
+      font-size: 1.6rem;
+    }
+    .mode-admin {
+      color: #0f172a;
+    }
+    .mode-admin::before {
+      opacity: 0.22;
+    }
+    .mode-admin .glass,
+    .mode-admin .subject-card,
+    .mode-admin .flash,
+    .mode-admin .nav-pill,
+    .mode-admin .chip {
+      background: #ffffff;
+      color: #0f172a;
+      border-color: #dbe3ee;
+      box-shadow: 0 12px 28px rgba(15, 23, 42, 0.08);
+    }
+    .mode-admin .nav-pill.active {
+      background: #e8eef6;
+      border-color: #b9c5d6;
+    }
+    .mode-admin .eyebrow {
+      color: #64748b;
+    }
+    .mode-admin .section-title {
+      color: #0f172a;
+    }
+    .mode-admin .text-slate-300,
+    .mode-admin .text-slate-400,
+    .mode-admin .text-slate-200 {
+      color: #475569 !important;
+    }
+    .mode-admin .input,
+    .mode-admin .select,
+    .mode-admin .textarea {
+      background: #fff;
+      color: #0f172a;
+      border-color: #cbd5e1;
+    }
+    .mode-admin .btn-secondary,
+    .mode-admin .btn-danger {
+      background: #fff;
+      color: #0f172a;
+      border-color: #cbd5e1;
+    }
+    .mode-admin .btn-primary {
+      background: #2563eb;
+      color: #fff;
+    }
+    .mode-admin .table-row {
+      border-bottom-color: #e2e8f0;
+    }
+    .mode-admin .chip {
+      background: #f8fafc;
+    }
+    .mode-admin .flash.success {
+      background: #ecfdf5;
+      border-color: #bbf7d0;
+    }
+    .mode-admin .flash.error {
+      background: #fef2f2;
+      border-color: #fecaca;
+    }
+    .mode-admin .flash.warn {
+      background: #fffbeb;
+      border-color: #fde68a;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 640px) {
+      body {
+        background-attachment: scroll;
+      }
+      .sticky {
+        position: sticky;
+      }
+      header .mx-auto {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      header .brand-badge {
+        width: 38px;
+        height: 38px;
+        border-radius: 12px;
+      }
+      header button[aria-label="Pergi ke halaman utama"] > span:last-child {
+        display: none;
+      }
+      header nav {
+        width: 100%;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        padding-bottom: 0.25rem;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+      }
+      header nav::-webkit-scrollbar {
+        display: none;
+      }
+      header nav .nav-pill,
+      header nav #logoutBtn {
+        flex: 0 0 auto;
+        white-space: nowrap;
+        font-size: 0.75rem;
+        padding: 0.55rem 0.8rem;
+      }
+      main {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+        padding-top: 0.75rem !important;
+        padding-bottom: 0.75rem !important;
+      }
+      .glass {
+        border-radius: 22px !important;
+        padding: 1rem !important;
+      }
+      .section-title {
+        font-size: 1.35rem;
+      }
+      .eyebrow {
+        font-size: 0.68rem;
+      }
+      .subject-card {
+        border-radius: 16px;
+        padding: 0.85rem;
+      }
+      .btn-primary,
+      .btn-secondary,
+      .btn-danger {
+        width: 100%;
+      }
+      .btn-danger[data-delete-subject] {
+        width: auto;
+      }
+      .mode-login #view-login .glass {
+        padding: 1rem !important;
+      }
+      .mode-login #view-login .section-title {
+        font-size: 1.45rem;
+      }
+      .mode-student #view-student .grid,
+      .mode-results #view-results .grid,
+      .mode-admin #view-admin .grid {
+        grid-template-columns: 1fr !important;
+      }
+      .mode-admin #view-admin .space-y-6 > * + * {
+        margin-top: 1rem !important;
+      }
+      .mode-admin .admin-subject-table,
+      .mode-admin .admin-student-table {
+        border-radius: 18px;
+        overflow: hidden;
+      }
+      .mode-admin .admin-subject-head,
+      .mode-admin .admin-student-head {
+        display: none;
+      }
+      .mode-admin .admin-subject-row,
+      .mode-admin .admin-student-row {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.4rem;
+        padding: 0.85rem 0.9rem;
+      }
+      .mode-admin .admin-subject-row > div:last-child,
+      .mode-admin .admin-student-row > div:last-child {
+        text-align: left;
+      }
+      .mode-admin #adminStudentList .table-row {
+        gap: 0.3rem;
+      }
+      .mode-admin .admin-student-table {
+        min-width: 0 !important;
+      }
+      .mode-admin .text-2xl,
+      .mode-admin .text-3xl {
+        font-size: 1.5rem !important;
+      }
+    }
+  </style>
+</head>
+<body class="font-sans text-slate-100">
+  <div class="relative z-10 min-h-screen">
+    <header class="sticky top-0 z-30 border-b border-slate-700/40 bg-slate-950/75 backdrop-blur-xl">
+      <div class="mx-auto flex max-w-7xl items-center justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
+        <button id="brandHome" class="flex items-center gap-3 text-left" type="button" aria-label="Pergi ke halaman utama">
+          <span class="brand-badge">SD</span>
+          <span>
+            <strong class="block text-sm font-extrabold sm:text-base">Sistem D'Undi Subjek Kegemaran</strong>
+            <span class="block text-xs text-slate-400">Frontend penuh · localStorage</span>
+          </span>
+        </button>
+
+        <nav class="flex flex-wrap items-center justify-end gap-2">
+          <button class="nav-pill rounded-full px-4 py-2 text-sm font-semibold" data-nav="login">Log Masuk</button>
+          <button class="nav-pill rounded-full px-4 py-2 text-sm font-semibold" data-nav="register">Daftar</button>
+          <button class="nav-pill rounded-full px-4 py-2 text-sm font-semibold" data-nav="student" id="navStudent">Papan Pemuka Pelajar</button>
+          <button class="nav-pill rounded-full px-4 py-2 text-sm font-semibold" data-nav="results">Keputusan</button>
+          <button class="nav-pill rounded-full px-4 py-2 text-sm font-semibold" data-nav="admin" id="navAdmin">Papan Pemuka Pentadbir</button>
+          <button id="logoutBtn" class="hidden rounded-full border border-rose-400/30 bg-rose-400/10 px-4 py-2 text-sm font-semibold text-rose-200">Log Keluar</button>
+        </nav>
+      </div>
+    </header>
+
+    <main class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <div id="flashHost" class="mb-5"></div>
+
+      <!-- Login -->
+      <section id="view-login" class="view fade-in">
+        <div class="mx-auto max-w-xl glass rounded-[28px] p-6 sm:p-8">
+          <div class="flex items-start justify-between gap-3">
+            <div>
+              <div class="eyebrow mb-2">Log Masuk</div>
+              <h1 class="section-title">Sistem D'Undi</h1>
+            </div>
+            <span class="badge-soft rounded-full px-3 py-2 text-xs font-semibold">Mod demo</span>
+          </div>
+
+          <div id="loginModeToggle" class="mt-5 grid grid-cols-2 gap-2">
+            <button class="nav-pill rounded-2xl px-4 py-3 text-sm font-bold" data-login-mode="student" type="button">Pelajar</button>
+            <button class="nav-pill rounded-2xl px-4 py-3 text-sm font-bold" data-login-mode="admin" type="button">Pentadbir</button>
+          </div>
+
+          <form id="loginForm" class="mt-5 space-y-4">
+            <input type="hidden" id="loginRole" value="student">
+            <div>
+              <label class="mb-2 block text-sm font-semibold text-slate-200" id="loginIdLabel">No Kad Pengenalan</label>
+              <input id="loginIdentifier" class="input" type="text" placeholder="010101010101" autocomplete="username">
+            </div>
+            <div>
+              <label class="mb-2 block text-sm font-semibold text-slate-200">Kata Laluan</label>
+              <input id="loginPassword" class="input" type="password" placeholder="Masukkan kata laluan" autocomplete="current-password">
+            </div>
+            <button class="btn-primary w-full rounded-2xl px-5 py-3.5 text-base" type="submit">Log Masuk</button>
+          </form>
+
+          <div class="mt-4 flex items-center justify-end gap-3 text-sm">
+            <button class="font-bold text-emerald-300 underline decoration-emerald-300/50 underline-offset-4" data-nav="register">Daftar pelajar</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Register -->
+      <section id="view-register" class="view hidden-view fade-in">
+        <div class="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
+          <div class="glass rounded-[28px] p-6 sm:p-8">
+            <div class="eyebrow mb-3">Pendaftaran pelajar</div>
+            <h2 class="section-title mb-4">Daftar akaun baharu</h2>
+            <p class="text-slate-300">
+              Maklumat ini akan disimpan dalam senarai pelajar dan digunakan untuk pengundian sekali sahaja.
+            </p>
+            <div class="mt-6 space-y-3">
+              <div class="subject-card">
+                <div class="font-bold">Satu pelajar, satu undi</div>
+                <div class="text-sm text-slate-300">Selepas mengundi, butang vote akan dikunci.</div>
+              </div>
+              <div class="subject-card">
+                <div class="font-bold">Mudah dipindahkan</div>
+                <div class="text-sm text-slate-300">Semua data boleh dieksport sebagai fail JSON.</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="glass rounded-[28px] p-6 sm:p-8">
+            <form id="registerForm" class="grid gap-4 sm:grid-cols-2">
+              <div class="sm:col-span-2">
+                <label class="mb-2 block text-sm font-semibold">Nama</label>
+                <input id="regName" class="input" type="text" placeholder="Nama penuh">
+              </div>
+              <div>
+                <label class="mb-2 block text-sm font-semibold">No Kad Pengenalan</label>
+                <input id="regIc" class="input" type="text" placeholder="010101010101" maxlength="12">
+              </div>
+              <div>
+                <label class="mb-2 block text-sm font-semibold">Kata Laluan</label>
+                <input id="regPassword" class="input" type="password" placeholder="Kata laluan">
+              </div>
+              <div class="sm:col-span-2">
+                <label class="mb-2 block text-sm font-semibold">Sahkan Kata Laluan</label>
+                <input id="regConfirm" class="input" type="password" placeholder="Taip semula kata laluan">
+              </div>
+              <div class="sm:col-span-2 flex flex-col gap-3 sm:flex-row">
+                <button class="btn-primary rounded-2xl px-5 py-3.5 font-bold" type="submit">Daftar</button>
+                <button class="btn-secondary rounded-2xl px-5 py-3.5 font-bold" type="button" data-nav="login">Kembali ke Log Masuk</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      <!-- Student Dashboard -->
+      <section id="view-student" class="view hidden-view fade-in">
+        <div class="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div class="eyebrow mb-2">Dashboard pelajar</div>
+            <h2 class="section-title">Selamat datang, <span id="studentWelcomeName">Pelajar</span></h2>
+            <p class="mt-2 max-w-2xl text-slate-300">
+              Pilih satu subjek kegemaran anda. Sistem akan menandakan bahawa anda telah mengundi.
+            </p>
+          </div>
+          <div class="glass rounded-3xl px-5 py-4">
+            <div class="text-sm text-slate-400">Status anda</div>
+            <div class="mt-1 text-2xl font-black" id="studentStatusText">Belum mengundi</div>
+          </div>
+        </div>
+
+        <div class="grid gap-6 xl:grid-cols-[1fr_0.72fr]">
+          <div class="glass rounded-[28px] p-6 sm:p-8">
+            <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <div class="eyebrow mb-2">Senarai subjek</div>
+                <h3 class="section-title">Undi subjek kegemaran</h3>
+              </div>
+              <button class="btn-secondary rounded-2xl px-4 py-2.5 font-bold" data-nav="results">Lihat Keputusan</button>
+            </div>
+            <div id="studentSubjects" class="mt-6 grid gap-4 md:grid-cols-2"></div>
+          </div>
+
+          <div class="space-y-6">
+            <div class="glass rounded-[28px] p-6 sm:p-8">
+              <div class="eyebrow mb-2">Ringkasan</div>
+              <div class="grid grid-cols-2 gap-4">
+                <div class="subject-card">
+                  <div class="text-sm text-slate-400">Jumlah subjek</div>
+                  <div id="studentCountSubjects" class="mt-1 text-3xl font-black">0</div>
+                </div>
+                <div class="subject-card">
+                  <div class="text-sm text-slate-400">Jumlah undi</div>
+                  <div id="studentCountVotes" class="mt-1 text-3xl font-black">0</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="glass rounded-[28px] p-6 sm:p-8">
+              <div class="eyebrow mb-2">Status terkini</div>
+              <div id="studentStatusCard" class="flash warn">
+                Sila pilih satu subjek untuk menghantar undi anda.
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Vote Success -->
+      <section id="view-success" class="view hidden-view fade-in">
+        <div class="mx-auto max-w-2xl">
+          <div class="glass rounded-[28px] p-8 text-center">
+            <div class="mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-full bg-emerald-400/15 text-4xl text-emerald-300">✓</div>
+            <div class="eyebrow mb-3">Undian berjaya</div>
+            <h2 class="section-title">Terima kasih! Undian anda telah direkodkan.</h2>
+            <p class="mt-4 text-slate-300">Masa rekod: <span id="successTime" class="font-semibold text-amber-300"></span></p>
+            <div class="mt-6 flex flex-col justify-center gap-3 sm:flex-row">
+              <button class="btn-primary rounded-2xl px-5 py-3.5 font-bold" data-nav="student">Kembali ke Dashboard</button>
+              <button class="btn-secondary rounded-2xl px-5 py-3.5 font-bold" data-nav="results">Lihat Keputusan</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Results -->
+      <section id="view-results" class="view hidden-view fade-in">
+        <div class="mb-6 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div class="eyebrow mb-2">Keputusan</div>
+            <h2 class="section-title">Subjek disusun ikut bilangan undi</h2>
+            <p class="mt-2 max-w-2xl text-slate-300">Carta ringkas di bawah dikemas kini secara terus berdasarkan data terkini.</p>
+          </div>
+          <div class="glass rounded-3xl px-5 py-4">
+            <div class="text-sm text-slate-400">Jumlah undi terkumpul</div>
+            <div id="resultTotalVotes" class="mt-1 text-3xl font-black">0</div>
+          </div>
+        </div>
+
+        <div class="grid gap-6 xl:grid-cols-[1.05fr_0.95fr]">
+          <div class="glass rounded-[28px] p-6 sm:p-8">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="eyebrow mb-2">Carta</div>
+                <h3 class="section-title">Ranking undian</h3>
+              </div>
+              <button class="btn-secondary rounded-2xl px-4 py-2.5 font-bold" data-nav="login">Log Masuk</button>
+            </div>
+            <div id="resultsChart" class="mt-6 grid gap-4"></div>
+          </div>
+
+          <div class="glass rounded-[28px] p-6 sm:p-8">
+            <div class="eyebrow mb-2">Senarai</div>
+            <h3 class="section-title">Keputusan terperinci</h3>
+            <div id="resultsList" class="mt-6 space-y-4"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Admin Dashboard -->
+      <section id="view-admin" class="view hidden-view fade-in">
+        <div class="mb-6 flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <div class="eyebrow mb-2">Dashboard admin</div>
+            <h2 class="section-title">Urus data</h2>
+          </div>
+          <div class="flex flex-wrap gap-2">
+            <button class="btn-secondary rounded-2xl px-4 py-2.5 font-bold" data-nav="results">Lihat Keputusan</button>
+            <button class="btn-danger rounded-2xl px-4 py-2.5 font-bold" id="resetVotesBtn">Reset Semua Undi</button>
+          </div>
+        </div>
+
+        <div class="grid gap-6 xl:grid-cols-[0.9fr_1.1fr]">
+          <div class="space-y-6">
+            <div class="glass rounded-[28px] p-6 sm:p-8">
+              <div class="eyebrow mb-2">Tambah subjek</div>
+              <h3 class="section-title">Daftarkan subjek baharu</h3>
+              <form id="addSubjectForm" class="mt-5 flex flex-col gap-3 sm:flex-row">
+                <input id="newSubjectName" class="input flex-1" type="text" placeholder="Contoh: Sains Komputer">
+                <button class="btn-primary rounded-2xl px-5 py-3.5 font-bold" type="submit">Tambah</button>
+              </form>
+            </div>
+
+            <div class="glass rounded-[28px] p-6 sm:p-8">
+              <div class="eyebrow mb-2">Import / Export</div>
+              <h3 class="section-title">Sandaran JSON</h3>
+              <div class="mt-5 flex flex-col gap-3 sm:flex-row">
+                <button class="btn-primary rounded-2xl px-5 py-3.5 font-bold" id="exportJsonBtn">Export JSON</button>
+                <label class="btn-secondary inline-flex cursor-pointer items-center justify-center rounded-2xl px-5 py-3.5 font-bold">
+                  Import JSON
+                  <input id="importJsonInput" type="file" accept="application/json" class="hidden">
+                </label>
+              </div>
+              <p class="mt-4 text-sm text-slate-400">Fail eksport akan dinamakan <code>undi_data_backup.json</code>.</p>
+            </div>
+          </div>
+
+          <div class="space-y-6">
+            <div class="glass rounded-[28px] p-6 sm:p-8">
+              <div class="flex items-center justify-between gap-3">
+                <div>
+                  <div class="eyebrow mb-2">Subjek</div>
+                  <h3 class="section-title">Senarai subjek</h3>
+                </div>
+                <span id="adminSubjectCount" class="chip">0 subjek</span>
+              </div>
+              <div id="adminSubjectList" class="mt-6 space-y-3"></div>
+            </div>
+
+            <div class="glass rounded-[28px] p-6 sm:p-8">
+              <div class="flex items-center justify-between gap-3">
+                <div>
+                  <div class="eyebrow mb-2">Pelajar</div>
+                  <h3 class="section-title">Status undian semua pelajar</h3>
+                </div>
+                <span id="adminStudentCount" class="chip">0 pelajar</span>
+              </div>
+              <div class="mt-6 max-h-[28rem] overflow-auto pr-1">
+                <div class="admin-student-table min-w-[520px]">
+                  <div class="admin-student-head grid grid-cols-4 gap-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-300">
+                    <div>Nama</div>
+                    <div>No. IC</div>
+                    <div>Status</div>
+                    <div>Undian</div>
+                  </div>
+                  <div id="adminStudentList" class="mt-2"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'sistem_undi_data';
+    const SESSION_KEY = 'sistem_undi_session';
+    const APP_NAME = "Sistem D'Undi Subjek Kegemaran";
+
+    const views = ['login', 'register', 'student', 'success', 'results', 'admin'];
+    const el = (id) => document.getElementById(id);
+    const nowIso = () => new Date().toISOString();
+    const clone = (value) => JSON.parse(JSON.stringify(value));
+
+    function uuid() {
+      if (window.crypto && crypto.randomUUID) return crypto.randomUUID();
+      return `id_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+    }
+
+    function safeJsonParse(text) {
+      try { return JSON.parse(text); } catch { return null; }
+    }
+
+    function defaultData() {
+      return {
+        students: [],
+        subjects: [
+          { id: 1, name: 'Sains Komputer', votes: 0 },
+          { id: 2, name: 'Bahasa Melayu', votes: 0 },
+          { id: 3, name: 'Matematik', votes: 0 },
+          { id: 4, name: 'Sejarah', votes: 0 }
+        ],
+        votes: [],
+        admin: {
+          username: 'admin',
+          password: hashSync('admin123')
+        }
+      };
+    }
+
+    function loadData() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const parsed = raw ? safeJsonParse(raw) : null;
+      if (!parsed || typeof parsed !== 'object') {
+        const init = defaultData();
+        saveData(init);
+        return init;
+      }
+      const normalized = normalizeData(parsed);
+      saveData(normalized);
+      return normalized;
+    }
+
+    function saveData(data) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    }
+
+    function loadSession() {
+      const raw = localStorage.getItem(SESSION_KEY);
+      const parsed = raw ? safeJsonParse(raw) : null;
+      return parsed && typeof parsed === 'object' ? parsed : null;
+    }
+
+    function saveSession(session) {
+      localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+    }
+
+    function clearSession() {
+      localStorage.removeItem(SESSION_KEY);
+    }
+
+    function flash(message, type = 'success') {
+      const host = el('flashHost');
+      host.innerHTML = `
+        <div class="flash ${type} fade-in mb-4 flex items-start justify-between gap-3">
+          <div class="text-sm font-medium">${escapeHtml(message)}</div>
+          <button type="button" class="text-slate-200/70" aria-label="Tutup mesej" data-close-flash>&times;</button>
+        </div>
+      `;
+      host.querySelector('[data-close-flash]')?.addEventListener('click', () => host.innerHTML = '');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#39;');
+    }
+
+    function hashSync(text) {
+      const bytes = new TextEncoder().encode(text);
+      let binary = '';
+      bytes.forEach((b) => binary += String.fromCharCode(b));
+      return btoa(binary);
+    }
+
+    function verifyHashSync(text, hashed) {
+      return hashSync(text) === hashed;
+    }
+
+    function normalizeData(input) {
+      const data = {
+        students: Array.isArray(input.students) ? input.students : [],
+        subjects: Array.isArray(input.subjects) ? input.subjects : [],
+        votes: Array.isArray(input.votes) ? input.votes : [],
+        admin: input.admin && typeof input.admin === 'object' ? input.admin : defaultData().admin,
+      };
+
+      data.students = data.students.map((student, index) => ({
+        id: Number(student.id ?? index + 1),
+        name: String(student.name ?? '').trim(),
+        ic: String(student.ic ?? '').trim(),
+        password: String(student.password ?? ''),
+        hasVoted: Boolean(student.hasVoted),
+      })).filter((student) => student.name && student.ic);
+
+      data.subjects = data.subjects.map((subject, index) => ({
+        id: Number(subject.id ?? index + 1),
+        name: String(subject.name ?? '').trim(),
+        votes: Number.isFinite(Number(subject.votes)) ? Number(subject.votes) : 0,
+      })).filter((subject) => subject.name);
+
+      data.votes = data.votes.map((vote) => ({
+        studentId: Number(vote.studentId),
+        subjectId: Number(vote.subjectId),
+        timestamp: String(vote.timestamp ?? nowIso()),
+      })).filter((vote) => vote.studentId && vote.subjectId);
+
+      if (!data.admin.username) data.admin.username = 'admin';
+      if (!data.admin.password) data.admin.password = defaultData().admin.password;
+
+      syncVotesWithFlags(data);
+      ensureIds(data);
+      return data;
+    }
+
+    function ensureIds(data) {
+      if (!data.students.length) return;
+      const studentIds = data.students.map((s) => s.id).filter(Number.isFinite);
+      const subjectIds = data.subjects.map((s) => s.id).filter(Number.isFinite);
+      const maxStudent = studentIds.length ? Math.max(...studentIds) : 0;
+      const maxSubject = subjectIds.length ? Math.max(...subjectIds) : 0;
+      data._nextStudentId = maxStudent + 1;
+      data._nextSubjectId = maxSubject + 1;
+    }
+
+    function syncVotesWithFlags(data) {
+      const votedStudentIds = new Set(data.votes.map((v) => v.studentId));
+      data.students.forEach((student) => {
+        student.hasVoted = votedStudentIds.has(student.id);
+      });
+      const tally = new Map(data.subjects.map((subject) => [subject.id, 0]));
+      data.votes.forEach((vote) => {
+        if (tally.has(vote.subjectId)) {
+          tally.set(vote.subjectId, tally.get(vote.subjectId) + 1);
+        }
+      });
+      data.subjects.forEach((subject) => {
+        subject.votes = tally.get(subject.id) || 0;
+      });
+    }
+
+    function getData() {
+      return loadData();
+    }
+
+    function setData(data) {
+      const normalized = normalizeData(data);
+      saveData(normalized);
+      return normalized;
+    }
+
+    function getSessionUser() {
+      const session = loadSession();
+      if (!session || !session.role || !session.token) return null;
+      return session;
+    }
+
+    function isLoggedIn() {
+      return Boolean(getSessionUser());
+    }
+
+    function isAdmin() {
+      const session = getSessionUser();
+      return session?.role === 'admin';
+    }
+
+    function isStudent() {
+      const session = getSessionUser();
+      return session?.role === 'student';
+    }
+
+    function currentStudent() {
+      const session = getSessionUser();
+      if (!session || session.role !== 'student') return null;
+      const data = getData();
+      return data.students.find((student) => student.id === session.userId) || null;
+    }
+
+    function sessionIsValid() {
+      const session = getSessionUser();
+      if (!session) return false;
+      const data = getData();
+      if (session.role === 'admin') {
+        return session.username === data.admin.username;
+      }
+      if (session.role === 'student') {
+        return data.students.some((student) => student.id === session.userId);
+      }
+      return false;
+    }
+
+    function sortSubjects(subjects) {
+      return [...subjects].sort((a, b) => b.votes - a.votes || a.name.localeCompare(b.name));
+    }
+
+    function totalVotes(data) {
+      return data.subjects.reduce((sum, subject) => sum + Number(subject.votes || 0), 0);
+    }
+
+    function setActiveNav(view) {
+      document.querySelectorAll('[data-nav]').forEach((btn) => {
+        btn.classList.toggle('active', btn.getAttribute('data-nav') === view);
+      });
+    }
+
+    function showView(view) {
+      const resolved = views.includes(view) ? view : 'login';
+      if (isLoggedIn() && !sessionIsValid()) {
+        clearSession();
+        flash('Sesi tidak sah selepas perubahan data. Sila log masuk semula.', 'warn');
+        return showView('login');
+      }
+      document.body.classList.remove('mode-login', 'mode-register', 'mode-student', 'mode-success', 'mode-results', 'mode-admin');
+      document.body.classList.add(`mode-${resolved}`);
+      if (!isLoggedIn() && !['login', 'register', 'results'].includes(resolved)) {
+        return showView('login');
+      }
+      if (isStudent() && resolved === 'admin') {
+        flash('Akses admin diperlukan.', 'error');
+        return showView('student');
+      }
+      if (isAdmin() && resolved === 'student') {
+        flash('Akses pelajar diperlukan.', 'error');
+        return showView('admin');
+      }
+      views.forEach((name) => {
+        el(`view-${name}`).classList.toggle('hidden-view', name !== resolved);
+      });
+      setActiveNav(resolved);
+      renderAll();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function routeFromHash() {
+      const hash = location.hash.replace('#', '').trim();
+      if (views.includes(hash)) return hash;
+      if (isAdmin()) return 'admin';
+      if (isStudent()) return 'student';
+      return 'login';
+    }
+
+    function updateHeader() {
+      el('logoutBtn').classList.toggle('hidden', !isLoggedIn());
+      el('navStudent').classList.toggle('hidden', !isStudent());
+      el('navAdmin').classList.toggle('hidden', !isAdmin());
+    }
+
+    function renderLoginMode(mode) {
+      const loginRole = el('loginRole');
+      const loginIdLabel = el('loginIdLabel');
+      const loginHint = el('loginHint');
+      const loginIdentifier = el('loginIdentifier');
+      const loginPassword = el('loginPassword');
+      loginRole.value = mode;
+      document.querySelectorAll('[data-login-mode]').forEach((btn) => {
+        btn.classList.toggle('active', btn.getAttribute('data-login-mode') === mode);
+      });
+      if (mode === 'admin') {
+        loginIdLabel.textContent = 'Username Admin';
+        if (loginHint) loginHint.textContent = '';
+        loginIdentifier.type = 'text';
+        loginIdentifier.placeholder = 'admin';
+        loginPassword.autocomplete = 'current-password';
+      } else {
+        loginIdLabel.textContent = 'No Kad Pengenalan';
+        if (loginHint) loginHint.textContent = '';
+        loginIdentifier.type = 'text';
+        loginIdentifier.placeholder = '010101010101';
+        loginPassword.autocomplete = 'current-password';
+      }
+    }
+
+    function passwordMatches(plain, stored) {
+      return hashSync(plain) === stored || plain === stored;
+    }
+
+    function renderStudentView() {
+      const data = getData();
+      const student = currentStudent();
+      const subjects = sortSubjects(data.subjects);
+      el('studentWelcomeName').textContent = student?.name || 'Pelajar';
+      el('studentStatusText').textContent = student?.hasVoted ? 'Sudah mengundi' : 'Belum mengundi';
+      el('studentStatusCard').className = `flash ${student?.hasVoted ? 'success' : 'warn'}`;
+      el('studentStatusCard').textContent = student?.hasVoted
+        ? 'Anda telah mengundi. Anda tidak boleh mengundi lagi.'
+        : 'Sila pilih satu subjek untuk menghantar undi anda.';
+      el('studentCountSubjects').textContent = String(subjects.length);
+      el('studentCountVotes').textContent = String(totalVotes(data));
+      const host = el('studentSubjects');
+      if (!subjects.length) {
+        host.innerHTML = `<div class="subject-card sm:col-span-2">Belum ada subjek. Pentadbir perlu menambah subjek dahulu.</div>`;
+        return;
+      }
+      host.innerHTML = subjects.map((subject) => {
+        const disabled = !student || student.hasVoted;
+        const voted = student?.hasVoted && data.votes.some((vote) => vote.studentId === student.id && vote.subjectId === subject.id);
+        return `
+          <div class="subject-card flex flex-col gap-3">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="text-lg font-extrabold">${escapeHtml(subject.name)}</div>
+                <div class="mt-1 text-sm text-slate-400">${subject.votes} undi terkumpul</div>
+              </div>
+              <span class="chip">${subject.votes} undi</span>
+            </div>
+            <div class="vote-bar"><span style="width: ${barWidth(subject.votes, data.subjects)}%"></span></div>
+            <button
+              class="${voted ? 'btn-danger' : 'btn-primary'} rounded-2xl px-4 py-3 font-bold disabled:cursor-not-allowed disabled:opacity-60"
+              data-vote-subject="${subject.id}"
+              ${disabled ? 'disabled' : ''}
+            >
+              ${voted ? 'Anda telah mengundi' : 'Undi'}
+            </button>
+          </div>
+        `;
+      }).join('');
+      host.querySelectorAll('[data-vote-subject]').forEach((btn) => {
+        btn.addEventListener('click', () => voteSubject(Number(btn.getAttribute('data-vote-subject'))));
+      });
+    }
+
+    function barWidth(votes, subjects) {
+      const max = Math.max(1, ...subjects.map((subject) => Number(subject.votes || 0)));
+      return Math.max(6, Math.round((votes / max) * 100));
+    }
+
+    function renderResultsView() {
+      const data = getData();
+      const subjects = sortSubjects(data.subjects);
+      const total = totalVotes(data);
+      el('resultTotalVotes').textContent = String(total);
+      const chart = el('resultsChart');
+      const list = el('resultsList');
+      if (!subjects.length) {
+        chart.innerHTML = '<div class="flash warn">Belum ada subjek untuk dipaparkan.</div>';
+        list.innerHTML = '<div class="flash warn">Belum ada keputusan.</div>';
+        return;
+      }
+      chart.innerHTML = subjects.map((subject) => `
+        <div class="subject-card">
+          <div class="flex items-center justify-between gap-3">
+            <div class="font-bold">${escapeHtml(subject.name)}</div>
+            <div class="chip">${subject.votes} undi</div>
+          </div>
+          <div class="mt-3 vote-bar"><span style="width:${barWidth(subject.votes, subjects)}%"></span></div>
+        </div>
+      `).join('');
+      list.innerHTML = subjects.map((subject, index) => `
+        <div class="subject-card">
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3">
+              <div class="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 font-black">#${index + 1}</div>
+              <div>
+                <div class="font-bold">${escapeHtml(subject.name)}</div>
+                <div class="text-sm text-slate-400">Subjek pilihan pelajar</div>
+              </div>
+            </div>
+            <div class="text-right">
+              <div class="text-2xl font-black text-emerald-300">${subject.votes}</div>
+              <div class="text-xs uppercase tracking-widest text-slate-400">undi</div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderAdminView() {
+      const data = getData();
+      const subjects = sortSubjects(data.subjects);
+      const students = [...data.students].sort((a, b) => a.name.localeCompare(b.name));
+      el('adminSubjectCount').textContent = `${subjects.length} subjek`;
+      el('adminStudentCount').textContent = `${students.length} pelajar`;
+
+      el('adminSubjectList').innerHTML = subjects.length
+        ? `
+            <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+              <div class="admin-subject-head grid grid-cols-[1fr_120px_120px] gap-0 border-b border-slate-200 bg-slate-50 px-4 py-3 text-xs font-bold uppercase tracking-wide text-slate-500">
+                <div>Subjek</div>
+                <div>Undi</div>
+                <div class="text-right">Tindakan</div>
+              </div>
+              ${subjects.map((subject) => `
+                <div class="admin-subject-row grid grid-cols-[1fr_120px_120px] gap-0 border-b border-slate-200 px-4 py-3 text-sm last:border-b-0">
+                  <div class="font-semibold text-slate-900">${escapeHtml(subject.name)}</div>
+                  <div class="font-semibold text-slate-700">${subject.votes}</div>
+                  <div class="text-right">
+                    <button class="btn-danger rounded-xl px-3 py-2 text-sm font-bold" data-delete-subject="${subject.id}">Padam</button>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          `
+        : '<div class="flash warn">Tiada subjek lagi. Tambah satu subjek dahulu.</div>';
+      el('adminSubjectList').querySelectorAll('[data-delete-subject]').forEach((btn) => {
+        btn.addEventListener('click', () => deleteSubject(Number(btn.getAttribute('data-delete-subject'))));
+      });
+
+      el('adminStudentList').innerHTML = students.length
+        ? students.map((student) => {
+            const vote = data.votes.find((item) => item.studentId === student.id);
+            const subjectName = vote ? (data.subjects.find((subject) => subject.id === vote.subjectId)?.name || '-') : '-';
+            return `
+              <div class="admin-student-row table-row grid grid-cols-4 gap-3 px-4 py-3 text-sm">
+                <div class="font-semibold">${escapeHtml(student.name)}</div>
+                <div class="text-slate-300">${escapeHtml(student.ic)}</div>
+                <div>
+                  <span class="chip ${student.hasVoted ? 'border-emerald-400/30 bg-emerald-400/10 text-emerald-200' : 'border-amber-400/30 bg-amber-400/10 text-amber-200'}">
+                    ${student.hasVoted ? 'Sudah undi' : 'Belum undi'}
+                  </span>
+                </div>
+                <div class="text-slate-300">${escapeHtml(subjectName)}</div>
+              </div>
+            `;
+          }).join('')
+        : '<div class="px-4 py-4 text-sm text-slate-400">Belum ada pelajar berdaftar.</div>';
+    }
+
+    function renderAuthButtons() {
+      const loggedIn = isLoggedIn();
+      el('logoutBtn').classList.toggle('hidden', !loggedIn);
+      el('navStudent').classList.toggle('hidden', !isStudent());
+      el('navAdmin').classList.toggle('hidden', !isAdmin());
+    }
+
+    function localizeStaticText() {
+      el('brandHome').querySelector('.text-xs').textContent = 'Frontend penuh · localStorage';
+      el('navStudent').textContent = 'Papan Pemuka Pelajar';
+      el('navAdmin').textContent = 'Papan Pemuka Pentadbir';
+      el('logoutBtn').textContent = 'Log Keluar';
+      document.querySelectorAll('#loginModeToggle [data-login-mode]').forEach((btn) => {
+        if (btn.getAttribute('data-login-mode') === 'admin') {
+          btn.textContent = 'Pentadbir';
+        }
+      });
+      const chips = el('view-login').querySelectorAll('.chip');
+      if (chips[0]) chips[0].textContent = 'Antaramuka BM';
+      if (chips[1]) chips[1].textContent = 'JavaScript biasa';
+      if (chips[2]) chips[2].textContent = 'Tailwind CSS';
+      if (chips[3]) chips[3].textContent = 'Sandaran JSON';
+      const featureLabel = el('view-login').querySelector('.text-2xl.font-black.text-amber-300');
+      if (featureLabel) featureLabel.textContent = 'Langsung';
+      const demoBadge = el('view-login').querySelector('.badge-soft');
+      if (demoBadge) demoBadge.textContent = 'Mod demo';
+      const studentEyebrow = el('view-student').querySelector('.eyebrow');
+      if (studentEyebrow) studentEyebrow.textContent = 'Papan Pemuka pelajar';
+      const adminEyebrow = el('view-admin').querySelector('.eyebrow');
+      if (adminEyebrow) adminEyebrow.textContent = 'Papan Pemuka pentadbir';
+    }
+
+    function renderAll() {
+      updateHeader();
+      renderAuthButtons();
+      if (document.getElementById('view-student') && !document.getElementById('view-student').classList.contains('hidden-view')) {
+        renderStudentView();
+      }
+      if (document.getElementById('view-results') && !document.getElementById('view-results').classList.contains('hidden-view')) {
+        renderResultsView();
+      }
+      if (document.getElementById('view-admin') && !document.getElementById('view-admin').classList.contains('hidden-view')) {
+        renderAdminView();
+      }
+    }
+
+    async function voteSubject(subjectId) {
+      const data = getData();
+      const session = getSessionUser();
+      if (!session || session.role !== 'student') {
+        flash('Sila log masuk sebagai pelajar terlebih dahulu.', 'error');
+        return showView('login');
+      }
+      const student = data.students.find((item) => item.id === session.userId);
+      if (!student) {
+        flash('Rekod pelajar tidak ditemui.', 'error');
+        return showView('login');
+      }
+      if (student.hasVoted) {
+        flash('Anda telah mengundi sebelum ini.', 'warn');
+        return showView('student');
+      }
+      const subject = data.subjects.find((item) => item.id === subjectId);
+      if (!subject) {
+        flash('Subjek tidak sah.', 'error');
+        return;
+      }
+
+      subject.votes += 1;
+      student.hasVoted = true;
+      data.votes.push({
+        studentId: student.id,
+        subjectId: subject.id,
+        timestamp: nowIso()
+      });
+      setData(data);
+      el('successTime').textContent = new Date().toLocaleString('ms-MY', {
+        dateStyle: 'long',
+        timeStyle: 'short'
+      });
+      flash('Undian telah direkodkan.', 'success');
+      location.hash = '#success';
+      showView('success');
+    }
+
+    function handleRegister(event) {
+      event.preventDefault();
+      const name = el('regName').value.trim();
+      const ic = el('regIc').value.trim();
+      const password = el('regPassword').value;
+      const confirm = el('regConfirm').value;
+      if (!name || !ic || !password || !confirm) {
+        return flash('Sila lengkapkan semua medan pendaftaran.', 'error');
+      }
+      if (password !== confirm) {
+        return flash('Kata laluan dan pengesahan tidak sepadan.', 'error');
+      }
+      const data = getData();
+      if (data.students.some((student) => student.ic === ic)) {
+        return flash('No kad pengenalan ini sudah didaftarkan.', 'error');
+      }
+      const student = {
+        id: data.students.length ? Math.max(...data.students.map((s) => s.id)) + 1 : 1,
+        name,
+        ic,
+        password: hashSync(password),
+        hasVoted: false,
+      };
+      data.students.push(student);
+      setData(data);
+      saveSession({
+        token: uuid(),
+        role: 'student',
+        userId: student.id,
+        username: student.name
+      });
+      flash('Pendaftaran berjaya. Anda telah log masuk sebagai pelajar.', 'success');
+      location.hash = '#student';
+      showView('student');
+    }
+
+    async function handleLogin(event) {
+      event.preventDefault();
+      const role = el('loginRole').value;
+      const identifier = el('loginIdentifier').value.trim();
+      const password = el('loginPassword').value;
+      if (!identifier || !password) {
+        return flash('Sila lengkapkan maklumat log masuk.', 'error');
+      }
+
+      const data = getData();
+      if (role === 'admin') {
+      const adminOk = identifier === data.admin.username && passwordMatches(password, data.admin.password);
+        if (!adminOk) {
+          return flash('Maklumat admin tidak sah.', 'error');
+        }
+        saveSession({ token: uuid(), role: 'admin', userId: 0, username: data.admin.username });
+        flash('Log masuk admin berjaya.', 'success');
+        location.hash = '#admin';
+        showView('admin');
+        return;
+      }
+
+      const student = data.students.find((item) => item.ic === identifier);
+      if (!student) {
+        return flash('Pelajar tidak ditemui.', 'error');
+      }
+      const ok = passwordMatches(password, student.password);
+      if (!ok) {
+        return flash('Kata laluan tidak sah.', 'error');
+      }
+      saveSession({ token: uuid(), role: 'student', userId: student.id, username: student.name });
+      flash('Log masuk pelajar berjaya.', 'success');
+      location.hash = '#student';
+      showView('student');
+    }
+
+    function addSubject(name) {
+      const data = getData();
+      const trimmed = name.trim();
+      if (!trimmed) return flash('Nama subjek tidak boleh kosong.', 'error');
+      if (data.subjects.some((subject) => subject.name.toLowerCase() === trimmed.toLowerCase())) {
+        return flash('Subjek ini sudah wujud.', 'error');
+      }
+      const id = data.subjects.length ? Math.max(...data.subjects.map((subject) => subject.id)) + 1 : 1;
+      data.subjects.push({ id, name: trimmed, votes: 0 });
+      setData(data);
+      flash('Subjek berjaya ditambah.', 'success');
+      renderAll();
+      showView('admin');
+    }
+
+    function deleteSubject(subjectId) {
+      if (!confirm('Padam subjek ini? Tindakan ini tidak boleh dibatalkan.')) return;
+      const data = getData();
+      const subject = data.subjects.find((item) => item.id === subjectId);
+      if (!subject) return flash('Subjek tidak ditemui.', 'error');
+      data.subjects = data.subjects.filter((item) => item.id !== subjectId);
+      data.votes = data.votes.filter((vote) => vote.subjectId !== subjectId);
+      data.students = data.students.map((student) => {
+        const votedOnDeleted = data.votes.some((vote) => vote.studentId === student.id);
+        return { ...student, hasVoted: votedOnDeleted };
+      });
+      syncVotesWithFlags(data);
+      setData(data);
+      flash('Subjek berjaya dipadam.', 'success');
+      renderAll();
+      showView('admin');
+    }
+
+    function resetVotes() {
+      if (!confirm('Reset semua undi dan status pelajar?')) return;
+      const data = getData();
+      data.subjects = data.subjects.map((subject) => ({ ...subject, votes: 0 }));
+      data.students = data.students.map((student) => ({ ...student, hasVoted: false }));
+      data.votes = [];
+      setData(data);
+      flash('Semua undi telah diset semula.', 'success');
+      renderAll();
+      showView('admin');
+    }
+
+    function exportJson() {
+      const data = getData();
+      const payload = JSON.stringify(data, null, 2);
+      const blob = new Blob([payload], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'undi_data_backup.json';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      flash('Fail JSON telah dimuat turun.', 'success');
+    }
+
+    async function importJson(file) {
+      const text = await file.text();
+      const parsed = safeJsonParse(text);
+      if (!parsed) return flash('Fail JSON tidak sah.', 'error');
+      if (!confirm('Import akan menggantikan semua data sedia ada. Teruskan?')) return;
+      try {
+        const normalized = normalizeData(parsed);
+        if (!Array.isArray(normalized.students) || !Array.isArray(normalized.subjects) || !Array.isArray(normalized.votes) || !normalized.admin) {
+          throw new Error('Struktur JSON tidak lengkap.');
+        }
+        setData(normalized);
+        flash('Data berjaya diimport dan menggantikan data lama.', 'success');
+        renderAll();
+        showView(routeFromHash());
+      } catch (error) {
+        flash(error.message || 'Import gagal.', 'error');
+      }
+    }
+
+    function logout() {
+      clearSession();
+      flash('Anda telah log keluar.', 'success');
+      location.hash = '#login';
+      showView('login');
+    }
+
+    function seedIfNeeded() {
+      const data = loadData();
+      if (!data.admin) {
+        data.admin = { username: 'admin', password: hashSync('admin123') };
+      }
+      if (!Array.isArray(data.subjects) || !data.subjects.length) {
+        data.subjects = defaultData().subjects;
+      }
+      if (!Array.isArray(data.students)) data.students = [];
+      if (!Array.isArray(data.votes)) data.votes = [];
+      syncVotesWithFlags(data);
+      saveData(data);
+    }
+
+    function bindEvents() {
+      document.querySelectorAll('[data-nav]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const view = btn.getAttribute('data-nav');
+          location.hash = `#${view}`;
+          showView(view);
+        });
+      });
+      el('brandHome').addEventListener('click', () => {
+        location.hash = '#login';
+        showView(isLoggedIn() ? (isAdmin() ? 'admin' : 'student') : 'login');
+      });
+      el('loginForm').addEventListener('submit', handleLogin);
+      el('registerForm').addEventListener('submit', handleRegister);
+      document.querySelectorAll('[data-login-mode]').forEach((btn) => {
+        btn.addEventListener('click', () => renderLoginMode(btn.getAttribute('data-login-mode')));
+      });
+      el('addSubjectForm').addEventListener('submit', (event) => {
+        event.preventDefault();
+        addSubject(el('newSubjectName').value);
+        el('newSubjectName').value = '';
+      });
+      el('resetVotesBtn').addEventListener('click', resetVotes);
+      el('exportJsonBtn').addEventListener('click', exportJson);
+      el('importJsonInput').addEventListener('change', (event) => {
+        const file = event.target.files?.[0];
+        if (file) importJson(file);
+        event.target.value = '';
+      });
+      el('logoutBtn').addEventListener('click', logout);
+      window.addEventListener('hashchange', () => showView(routeFromHash()));
+    }
+
+    function boot() {
+      seedIfNeeded();
+      bindEvents();
+      localizeStaticText();
+      renderLoginMode('student');
+      updateHeader();
+      const initial = routeFromHash();
+      if (initial === 'login' && isStudent()) {
+        location.hash = '#student';
+      } else if (initial === 'login' && isAdmin()) {
+        location.hash = '#admin';
+      } else if (initial === 'login' && !location.hash) {
+        location.hash = '#login';
+      }
+      showView(routeFromHash());
+    }
+
+    boot();
+  </script>
+</body>
+</html>
