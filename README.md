@@ -233,6 +233,6 @@ The visual style is split by mode:
 
 ## Deliverable Location
 
-- App: [outputs/sistem_undi_pure_frontend.html](index.html)
+- App: [sistem_undi_pure_frontend.html](index.html))
 - Report: [outputs/README.md](./README.md)
 
